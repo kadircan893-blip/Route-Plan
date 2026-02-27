@@ -38,12 +38,39 @@ No generic tourist lists. Your filters, your route.
 
 ## Tech Stack
 
-| Layer | Technologies |
+### Frontend
+| Technology | Purpose |
 |---|---|
-| **Frontend** | React 19, React Router, Zustand, Tailwind CSS, Framer Motion, Ant Design |
-| **Backend** | Node.js, Express 5 |
-| **Maps & Places** | Geoapify Places API, OpenStreetMap Nominatim, OSRM Routing |
-| **Build** | Vite 7, ESLint, PostCSS |
+| React 19 | UI framework |
+| React Router DOM 7 | Client-side routing |
+| Zustand 5 | Global state management |
+| Tailwind CSS 3 | Styling |
+| Framer Motion 12 | Animations |
+| Ant Design 6 | UI component library |
+| Lucide React | Icon library |
+
+### Backend
+| Technology | Purpose |
+|---|---|
+| Node.js | Server runtime |
+| Express 5 | API server (port 3001) |
+| dotenv | Environment variables |
+| CORS | Cross-origin requests |
+
+### External APIs
+| API | Purpose |
+|---|---|
+| Geoapify Places API | Point of interest search |
+| OpenStreetMap Nominatim | Geocoding (address ↔ coordinates) |
+| OSRM | Route calculation (driving / walking) |
+| Google Maps | Route visualization and navigation |
+
+### Build Tools
+| Technology | Purpose |
+|---|---|
+| Vite 7 | Build tool and dev server |
+| ESLint 9 | Code linting |
+| PostCSS | CSS processing |
 
 ---
 
