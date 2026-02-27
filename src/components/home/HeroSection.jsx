@@ -6,7 +6,7 @@ const HeroSection = () => {
       {/* Main Title */}
       <div className="space-y-4">
         <h1 className="font-sf-pro font-semibold text-4xl md:text-5xl lg:text-6xl text-dark-slate">
-          Drell ile Keşfet
+          Route-Plan ile Keşfet
         </h1>
         <p className="font-sf-pro font-semibold text-2xl md:text-3xl text-moss-green">
           Smart Journey Planner

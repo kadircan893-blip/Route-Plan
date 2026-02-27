@@ -1,9 +1,9 @@
+/* Import Google Fonts */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
-
-/* Import Google Fonts */
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
 
 /* SF Pro Display yerine system font kullanacağız (Mac'te otomatik gelir) */
 @layer base {
@@ -20,6 +20,14 @@
   h1, h2, h3, h4, h5, h6 {
     @apply font-sf-pro font-semibold;
   }
+}
+
+/* Floating Particles Animation */
+@keyframes float {
+  0%   { transform: translateY(0px) translateX(0px); }
+  33%  { transform: translateY(-30px) translateX(15px); }
+  66%  { transform: translateY(-15px) translateX(-10px); }
+  100% { transform: translateY(0px) translateX(0px); }
 }
 
 /* Custom Scrollbar */

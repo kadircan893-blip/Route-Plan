@@ -8,6 +8,10 @@ const useAppStore = create((set) => ({
   // Seçilen Kategoriler
   selectedCategories: [],
   setSelectedCategories: (categories) => set({ selectedCategories: categories }),
+
+  // Kategori Alt Filtreleri (keyword)
+  categoryKeywords: {},
+  setCategoryKeywords: (keywords) => set({ categoryKeywords: keywords }),
   addCategory: (categoryId) => set((state) => ({
     selectedCategories: [...state.selectedCategories, categoryId],
   })),
@@ -52,6 +56,7 @@ const useAppStore = create((set) => ({
   resetAll: () => set({
     locationData: null,
     selectedCategories: [],
+    categoryKeywords: {},
     places: {},
     coordinates: null,
     selectedPlaces: [],

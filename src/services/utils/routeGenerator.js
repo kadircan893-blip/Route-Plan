@@ -1,17 +1,33 @@
 
-export const generateOptimalRoute = (selectedPlaces) => {
+export const generateOptimalRoute = (selectedPlaces, userCoordinates = null) => {
   if (!selectedPlaces || selectedPlaces.length === 0) return [];
-  
-  if (selectedPlaces.length <= 2) return selectedPlaces;
-  
-  const route = [selectedPlaces[0]];
-  const remaining = [...selectedPlaces.slice(1)];
-  
+
+  if (selectedPlaces.length === 1) return selectedPlaces;
+
+  // Başlangıç noktasını belirle: kullanıcı konumuna en yakın mekan
+  let startIndex = 0;
+  if (userCoordinates) {
+    let minDist = Infinity;
+    selectedPlaces.forEach((place, index) => {
+      const dist = calculateDistanceFromCoords(
+        userCoordinates.lat, userCoordinates.lng,
+        place.location.lat, place.location.lng
+      );
+      if (dist < minDist) {
+        minDist = dist;
+        startIndex = index;
+      }
+    });
+  }
+
+  const route = [selectedPlaces[startIndex]];
+  const remaining = selectedPlaces.filter((_, i) => i !== startIndex);
+
   while (remaining.length > 0) {
     const current = route[route.length - 1];
     let nearestIndex = 0;
     let nearestDistance = Infinity;
-    
+
     remaining.forEach((place, index) => {
       const distance = calculateDistanceBetweenPlaces(current, place);
       if (distance < nearestDistance) {
@@ -19,12 +35,25 @@ export const generateOptimalRoute = (selectedPlaces) => {
         nearestIndex = index;
       }
     });
-    
+
     route.push(remaining[nearestIndex]);
     remaining.splice(nearestIndex, 1);
   }
-  
+
   return route;
+};
+
+const calculateDistanceFromCoords = (lat1, lng1, lat2, lng2) => {
+  const R = 6371;
+  const dLat = (lat2 - lat1) * (Math.PI / 180);
+  const dLng = (lng2 - lng1) * (Math.PI / 180);
+  const a =
+    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+    Math.cos(lat1 * (Math.PI / 180)) *
+    Math.cos(lat2 * (Math.PI / 180)) *
+    Math.sin(dLng / 2) *
+    Math.sin(dLng / 2);
+  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 };
 
 const calculateDistanceBetweenPlaces = (place1, place2) => {

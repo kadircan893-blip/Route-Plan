@@ -1,140 +1,184 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useState } from 'react';
 import Layout from '../components/common/Layout';
-import Button from '../components/common/Button';
-import CardGrid from '../components/cards/CardGrid';
-import { getCardGroups } from '../constants/categories';
 import useAppStore from '../store/appStore';
 
+const ALL_CATEGORIES = [
+  {
+    id: 'restoranlar', label: 'Restoranlar', emoji: '🍴', desc: 'Yemek mekanlarını keşfet',
+    filters: [
+      { keyword: 'burger',  label: 'Burger', emoji: '🍔' },
+      { keyword: 'pizza',   label: 'Pizza',  emoji: '🍕' },
+      { keyword: 'döner',   label: 'Döner',  emoji: '🥙' },
+      { keyword: 'pide',    label: 'Pide',   emoji: '🫓' },
+      { keyword: 'kebap',   label: 'Kebap',  emoji: '🌯' },
+      { keyword: 'sushi',   label: 'Sushi',  emoji: '🍣' },
+      { keyword: 'balık',   label: 'Balık',  emoji: '🐟' },
+    ],
+  },
+  {
+    id: 'kahve-brunch', label: 'Kahve & Brunch', emoji: '☕', desc: 'Kafe ve brunch mekanları',
+    filters: [
+      { keyword: 'kahve',   label: 'Kahve',   emoji: '☕' },
+      { keyword: 'tatlı',   label: 'Tatlı',   emoji: '🍰' },
+      { keyword: 'pastane', label: 'Pastane', emoji: '🥐' },
+    ],
+  },
+  { id: 'publar',           label: 'Pub',              emoji: '🍻', desc: 'Bar ve pub mekanları'        },
+  { id: 'muze-gezisi',      label: 'Müze Gezisi',       emoji: '🖼️', desc: 'Müzeleri keşfedin'           },
+  { id: 'tarihi-gezi',      label: 'Tarihi Gezi',       emoji: '🏛️', desc: 'Tarihi yerleri keşfedin'     },
+  { id: 'otel',             label: 'Otel',              emoji: '🏨', desc: 'Konaklama seçenekleri'       },
+  { id: 'supermarket',      label: 'Süpermarket',       emoji: '🛒', desc: 'Yakındaki marketler'         },
+  { id: 'sahiller',         label: 'Plaj & Sahil',      emoji: '🏖️', desc: 'Deniz ve plaj keyfi'         },
+  { id: 'doga-yuruyusu',    label: 'Doğa Yürüyüşü',    emoji: '🥾', desc: 'Doğa yürüyüş rotaları'      },
+  { id: 'kamp',             label: 'Kamp Alanı',        emoji: '⛺', desc: 'Kamp alanlarını keşfedin'   },
+  { id: 'benzin-istasyonu', label: 'Benzin İstasyonu',  emoji: '⛽', desc: 'Yakındaki istasyonlar'       },
+  { id: 'park',             label: 'Park',              emoji: '🌳', desc: 'Yakındaki parklar'           },
+];
+
 const CardSelectionPage = ({ onCategoriesSubmit }) => {
-  const navigate = useNavigate();
-  const { locationData } = useAppStore();
-  const cardGroups = getCardGroups();
+  const [selectedCats, setSelectedCats] = useState(new Set());
+  const [activeFilters, setActiveFilters] = useState({});
+  const locationData = useAppStore(s => s.locationData);
 
-  const [currentGroupIndex, setCurrentGroupIndex] = useState(0);
-  const [selectedCards, setSelectedCards] = useState([]);
-
-  const currentGroup = cardGroups[currentGroupIndex];
-  const isLastGroup = currentGroupIndex === cardGroups.length - 1;
-  const progress = ((currentGroupIndex + 1) / cardGroups.length) * 100;
-
-  const handleCardSelect = (categoryId) => {
-    setSelectedCards(prev => {
-      if (prev.includes(categoryId)) {
-        // Seçimi kaldır
-        return prev.filter(id => id !== categoryId);
+  const toggleCat = (id) => {
+    setSelectedCats(prev => {
+      const next = new Set(prev);
+      if (next.has(id)) {
+        next.delete(id);
+        setActiveFilters(f => { const n = { ...f }; delete n[id]; return n; });
       } else {
-        // Seçim ekle
-        return [...prev, categoryId];
+        next.add(id);
       }
+      return next;
     });
   };
 
-  const handleNext = () => {
-    if (isLastGroup) {
-      console.log('Seçilen Kategoriler:', selectedCards);
-      onCategoriesSubmit(selectedCards);
-    } else {
-      setCurrentGroupIndex(prev => prev + 1);
-    }
+  const toggleFilter = (catId, keyword) => {
+    setActiveFilters(prev => {
+      const curr = prev[catId] || [];
+      return {
+        ...prev,
+        [catId]: curr.includes(keyword) ? curr.filter(k => k !== keyword) : [...curr, keyword],
+      };
+    });
   };
 
-  const handleBack = () => {
-    if (currentGroupIndex > 0) {
-      setCurrentGroupIndex(prev => prev - 1);
-    } else {
-      navigate('/');
-    }
+  const totalSelected = selectedCats.size;
+
+  const handleSubmit = () => {
+    onCategoriesSubmit([...selectedCats], { ...activeFilters });
   };
+
+  const selectedFilterable = ALL_CATEGORIES.filter(c => c.filters && selectedCats.has(c.id));
+
+  const destination = locationData?.city && locationData?.district
+    ? `${locationData.district}, ${locationData.city}`
+    : null;
+
+  const isLocal = locationData?.searchMode === 'local';
 
   return (
     <Layout>
-      <div className="max-w-7xl mx-auto space-y-8">
-        {/* Header */}
-        <div className="text-center space-y-4">
-          <h1 className="font-sf-pro font-semibold text-3xl md:text-4xl text-dark-slate">
-            İlgi Alanlarınızı Seçin
-          </h1>
-          <p className="font-inter text-base text-dark-slate opacity-75">
-            {locationData?.city && locationData?.district 
-              ? `${locationData.city}, ${locationData.district} - ${locationData.distance}km yarıçapında`
-              : 'Geziniz için ilginizi çeken kategorileri seçin'}
-          </p>
+      <div className="max-w-2xl mx-auto space-y-4 pb-6">
+
+        {/* Başlık */}
+        <div>
+          <h2 className="font-sf-pro font-semibold text-2xl text-dark-slate">Kategori Seç</h2>
+          {destination && (
+            <p className="font-inter text-sm text-dark-slate opacity-60 mt-1">
+              {isLocal
+                ? `${destination} çevresindeki mekanlar listelenecek`
+                : `${destination} rotasındaki mekanlar listelenecek`}
+            </p>
+          )}
         </div>
 
-        {/* Progress Bar */}
-        <div className="space-y-2">
-          <div className="flex justify-between items-center">
-            <span className="font-inter text-sm text-dark-slate">
-              Grup {currentGroupIndex + 1} / {cardGroups.length}
-            </span>
-            <span className="font-inter text-sm font-semibold text-moss-green">
-              {selectedCards.length} kategori seçildi
-            </span>
-          </div>
-          <div className="w-full h-3 bg-soft-mint rounded-full overflow-hidden">
-            <div 
-              className="h-full bg-moss-green transition-all duration-500 ease-out rounded-full"
-              style={{ width: `${progress}%` }}
-            />
-          </div>
+        {/* Tüm kategoriler — 2 sütun grid */}
+        <div className="grid grid-cols-2 gap-3">
+          {ALL_CATEGORIES.map(({ id, label, emoji, desc }) => {
+            const active = selectedCats.has(id);
+            return (
+              <button
+                key={id}
+                type="button"
+                onClick={() => toggleCat(id)}
+                className={`relative flex items-center gap-3 p-4 rounded-2xl border-2 text-left transition-all
+                  ${active
+                    ? 'border-moss-green bg-moss-green/5 shadow-soft'
+                    : 'border-soft-mint bg-white hover:border-moss-green hover:bg-soft-mint/20'
+                  }`}
+              >
+                {active && (
+                  <div className="absolute top-2 right-2 w-5 h-5 bg-moss-green rounded-full flex items-center justify-center">
+                    <span className="text-white text-xs font-bold">✓</span>
+                  </div>
+                )}
+                <span className="text-3xl flex-shrink-0">{emoji}</span>
+                <div className="flex-1 min-w-0">
+                  <p className={`font-sf-pro font-semibold text-sm leading-tight ${active ? 'text-moss-green' : 'text-dark-slate'}`}>
+                    {label}
+                  </p>
+                  <p className="font-inter text-xs text-dark-slate opacity-50 mt-0.5 line-clamp-1">{desc}</p>
+                </div>
+              </button>
+            );
+          })}
         </div>
 
-        {/* Card Grid */}
-        <CardGrid
-          categories={currentGroup}
-          selectedCards={selectedCards}
-          onCardSelect={handleCardSelect}
-        />
-
-        {/* Info Box */}
-        <div className="bg-sky-light bg-opacity-20 p-4 rounded-button border border-sky-light max-w-2xl mx-auto">
-          <p className="font-inter text-sm text-dark-slate text-center">
-            💡 <strong>İpucu:</strong> Kartların üzerine geldiğinizde ters dönecektir. 
-            İstediğiniz kadar kategori seçebilir veya hiç seçmeden geçebilirsiniz.
-          </p>
-        </div>
-
-        {/* Navigation Buttons */}
-        <div className="flex gap-4 justify-center">
-          <Button 
-            variant="outline" 
-            onClick={handleBack}
-            className="min-w-32"
-          >
-            {currentGroupIndex === 0 ? 'Ana Sayfa' : 'Geri'}
-          </Button>
-          
-          <Button 
-            variant="primary" 
-            onClick={handleNext}
-            className="min-w-32"
-          >
-            {isLastGroup ? 'Rotayı Oluştur' : 'Sonraki'}
-          </Button>
-        </div>
-
-        {/* Selected Categories Summary */}
-        {selectedCards.length > 0 && (
-          <div className="bg-white p-6 rounded-card shadow-soft max-w-3xl mx-auto">
-            <h3 className="font-sf-pro font-semibold text-lg text-dark-slate mb-3">
-              Seçtiğiniz Kategoriler:
-            </h3>
-            <div className="flex flex-wrap gap-2">
-              {selectedCards.map(cardId => {
-                const category = cardGroups.flat().find(cat => cat.id === cardId);
-                return (
-                  <span 
-                    key={cardId}
-                    className="px-3 py-1 bg-soft-mint text-moss-green font-inter text-sm font-medium rounded-full"
-                  >
-                    {category?.emoji} {category?.title}
-                  </span>
-                );
-              })}
-            </div>
+        {/* Filtre paneli — seçilen filtre içerikli kategoriler için */}
+        {selectedFilterable.length > 0 && (
+          <div className="space-y-3">
+            {selectedFilterable.map(cat => (
+              <div key={cat.id} className="bg-white rounded-2xl border border-soft-mint shadow-soft p-4">
+                <p className="font-inter font-medium text-sm text-dark-slate mb-3">
+                  {cat.emoji} {cat.label} Filtreleri
+                  <span className="font-normal opacity-50 ml-1">(isteğe bağlı)</span>
+                </p>
+                <div className="flex flex-wrap gap-2">
+                  {cat.filters.map(({ keyword, label, emoji }) => {
+                    const active = (activeFilters[cat.id] || []).includes(keyword);
+                    return (
+                      <button
+                        key={keyword}
+                        type="button"
+                        onClick={() => toggleFilter(cat.id, keyword)}
+                        className={`flex items-center gap-1.5 px-3 py-2 rounded-full border-2 transition-all
+                          ${active
+                            ? 'border-moss-green bg-moss-green text-white shadow-soft'
+                            : 'border-soft-mint text-dark-slate hover:border-moss-green hover:bg-soft-mint/20'
+                          }`}
+                      >
+                        <span className="text-base leading-none">{emoji}</span>
+                        <span className="font-inter font-medium text-xs">{label}</span>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            ))}
           </div>
         )}
+
+        {/* Seçim özeti */}
+        {totalSelected > 0 && (
+          <div className="bg-moss-green/5 border border-moss-green/20 rounded-xl px-4 py-3">
+            <p className="font-inter text-sm text-moss-green font-medium">
+              {totalSelected} kategori seçildi
+            </p>
+          </div>
+        )}
+
+        {/* Submit */}
+        <button
+          type="button"
+          onClick={handleSubmit}
+          disabled={totalSelected === 0}
+          className="w-full py-4 bg-moss-green text-white font-sf-pro font-semibold text-base rounded-button shadow-soft transition-all hover:bg-ocean-blue active:scale-[0.98] disabled:opacity-40 disabled:cursor-not-allowed"
+        >
+          Mekanları Bul
+          {totalSelected > 0 && <span className="ml-2 opacity-80">({totalSelected} kategori)</span>}
+        </button>
+
       </div>
     </Layout>
   );

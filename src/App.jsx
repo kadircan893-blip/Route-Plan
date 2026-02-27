@@ -7,15 +7,16 @@ import useAppStore from './store/appStore';
 
 function App() {
   const navigate = useNavigate();
-  const { setLocationData, setSelectedCategories } = useAppStore();
+  const { setLocationData, setSelectedCategories, setCategoryKeywords } = useAppStore();
 
   const handleLocationSubmit = (data) => {
     setLocationData(data);
     navigate('/card-selection');
   };
 
-  const handleCategoriesSubmit = (categories) => {
+  const handleCategoriesSubmit = (categories, keywords) => {
     setSelectedCategories(categories);
+    setCategoryKeywords(keywords ?? {});
     navigate('/route-plan');
   };
 
