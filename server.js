@@ -241,7 +241,7 @@ app.post('/api/places/textsearch-new', async (req, res) => {
 const distPath = join(__dirname, 'dist');
 if (existsSync(distPath)) {
   app.use(express.static(distPath));
-  app.get('*', (req, res) => {
+  app.get('/{*splat}', (_req, res) => {
     res.sendFile(join(distPath, 'index.html'));
   });
 }

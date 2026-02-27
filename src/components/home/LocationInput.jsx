@@ -4,7 +4,7 @@ import Button from '../common/Button';
 import Card from '../common/Card';
 import { DISTRICTS } from '../../constants/districts';
 
-const BACKEND_URL = 'http://localhost:3001';
+const BACKEND_URL = import.meta.env.DEV ? 'http://localhost:3001' : '';
 
 const cities = Object.keys(DISTRICTS);
 
