@@ -1,6 +1,6 @@
 import { haversineDistance } from '../utils/distanceCalculator';
 
-const BACKEND_URL = 'http://localhost:3001';
+const BACKEND_URL = import.meta.env.DEV ? 'http://localhost:3001' : '';
 
 // ─── Kategori konfigürasyonu (New Places API v1) ──────────────────────────
 const CATEGORY_CONFIG = {
