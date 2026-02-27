@@ -15,7 +15,7 @@ app.use(cors());
 app.use(express.json());
 
 // ─── API Anahtarları ──────────────────────────────────────────────────────
-const GEOAPIFY_KEY = '8e3d60d2d6364bee806d593f46e93cf3'; 
+const GEOAPIFY_KEY = import.meta.env.VITE_GEOAPIFY_KEY;
 const NOMINATIM_UA = 'drell-app/1.0 (portfolio)';
 
 // ─── Google Places tipi → Geoapify kategori eşlemesi ─────────────────────
