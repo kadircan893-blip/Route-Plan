@@ -1,4 +1,6 @@
 /* eslint-disable no-undef */
+import dotenv from "dotenv";
+dotenv.config();
 import express from 'express';
 import cors from 'cors';
 import { fileURLToPath } from 'url';
@@ -15,7 +17,11 @@ app.use(cors());
 app.use(express.json());
 
 // ─── API Anahtarları ──────────────────────────────────────────────────────
+<<<<<<< Updated upstream
 const GEOAPIFY_KEY = '8e3d60d2d6364bee806d593f46e93cf3';
+=======
+const GEOAPIFY_KEY = process.env.VITE_GEOAPIFY_KEY;
+>>>>>>> Stashed changes
 const NOMINATIM_UA = 'drell-app/1.0 (portfolio)';
 
 // ─── Google Places tipi → Geoapify kategori eşlemesi ─────────────────────

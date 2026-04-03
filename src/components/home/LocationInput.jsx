@@ -82,7 +82,7 @@ const LocationInput = ({ onSubmit }) => {
         const gps = { lat: coords.latitude, lng: coords.longitude };
         let label = 'Konum algılandı';
         try {
-          const res = await fetch(`${BACKEND_URL}/api/reverse-geocode?lat=${gps.lat}&lng=${gps.lng}`);
+          const res = await fetch(`${BACKEND_URL}/api/reverse-geocode?lat=${gps.lat}&lng=${gps.lng}`)
           const data = await res.json();
           if (data.results?.[0]) {
             const get = (types) => {
